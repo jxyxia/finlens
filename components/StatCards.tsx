@@ -11,18 +11,18 @@ interface StatCardsProps {
   forecastDate: string;
 }
 
-function useCountUp(target: number, duration = 900) {
+function useCountUp(target: number, duration = 800) {
   const [display, setDisplay] = useState(0);
   const prev = useRef(0);
 
   useEffect(() => {
     const start = prev.current;
-    const diff  = target - start;
+    const diff = target - start;
     if (diff === 0) return;
     const startTime = performance.now();
     const step = (now: number) => {
       const pct = Math.min((now - startTime) / duration, 1);
-      const ease = 1 - Math.pow(1 - pct, 3); // cubic ease-out
+      const ease = 1 - Math.pow(1 - pct, 3);
       setDisplay(Math.round(start + diff * ease));
       if (pct < 1) requestAnimationFrame(step);
       else prev.current = target;
@@ -34,20 +34,18 @@ function useCountUp(target: number, duration = 900) {
 }
 
 function StatCard({
-  label, value, sub, color, prefix = '', suffix = '', icon,
+  label, value, sub, color, prefix = '',
 }: {
-  label: string; value: number; sub: string; color?: string;
-  prefix?: string; suffix?: string; icon: string;
+  label: string; value: number; sub: string; color?: string; prefix?: string;
 }) {
   const displayed = useCountUp(Math.abs(value));
   const formatted = new Intl.NumberFormat('en-IN').format(displayed);
 
   return (
     <div className="stat-card">
-      <div className="stat-card-icon">{icon}</div>
       <div className="stat-label">{label}</div>
       <div className="stat-value" style={color ? { color } : {}}>
-        {prefix}{formatted}{suffix}
+        {prefix}{formatted}
       </div>
       <div className="stat-sub" dangerouslySetInnerHTML={{ __html: sub }} />
     </div>
@@ -58,35 +56,33 @@ export default function StatCards({
   totalTransactions, anomaliesFound, totalSpend,
   spendChange, predictedBalance, forecastDate,
 }: StatCardsProps) {
+  const anomalyPct = ((anomaliesFound / Math.max(totalTransactions, 1)) * 100).toFixed(1);
+
   return (
     <div className="stat-cards">
       <StatCard
-        label="TOTAL TRANSACTIONS"
+        label="Transactions"
         value={totalTransactions}
-        sub="Last 30 days"
-        icon="🔢"
+        sub="in this statement"
       />
       <StatCard
-        label="ANOMALIES FOUND"
+        label="Anomalies"
         value={anomaliesFound}
-        sub={`${((anomaliesFound / Math.max(totalTransactions, 1)) * 100).toFixed(1)}% of total`}
-        color="#ff4757"
-        icon="⚠️"
+        sub={`${anomalyPct}% flagged`}
+        color="var(--red)"
       />
       <StatCard
-        label="TOTAL SPEND"
+        label="Total spend"
         value={totalSpend}
         prefix="₹"
-        sub={`<span style="color:#ff4757">↑ ${spendChange}%</span> vs last month`}
-        icon="💳"
+        sub={`<span style="color:var(--red)">↑ ${spendChange}%</span> vs last month`}
       />
       <StatCard
-        label="PREDICTED BALANCE"
+        label="Predicted balance"
         value={predictedBalance}
         prefix="₹"
-        sub={`On ${forecastDate}`}
-        color={predictedBalance > 0 ? '#2ed573' : '#ff4757'}
-        icon="📊"
+        sub={`end of month · ${forecastDate}`}
+        color={predictedBalance > 0 ? 'var(--green)' : 'var(--red)'}
       />
     </div>
   );
