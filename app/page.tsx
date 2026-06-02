@@ -124,10 +124,6 @@ export default function Home() {
           </>
         )}
 
-        {loading && !state && (
-          <UploadZone onFileUpload={handleFileUpload} isProcessing={true} />
-        )}
-
         {state && (
           <>
             <div className="file-info-bar">
